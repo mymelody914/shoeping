@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shoeping.question.mapper.QuestionMapper">
+<select id="list" resultType="com.shoeping.question.vo.QuestionVO">
+	select qno, title, id, itemNo, content, writeDate, pw
+	from(
+		select rownum rnum, qno, title, id, itemNo, content, writeDate, pw
+		from(
+			select qno, title, id, itemNo, content, writeDate, pw
+			from question
+			order by qno desc
+		)
+	)
+	where rnum between #{startRow} and #{endRow}
+</select>
+
+<select id="getTotalRow" resultType="Long">
+	select count(*)
+	from question
+</select>
+
+<select id="qlist" resultType="com.shoeping.question.vo.QuestionVO">
+	select qno, title, id, itemNo, content, writeDate, pw
+	from question
+	where itemNo = #{itemNo}			
+	order by qno desc
+</select>
+
+<select id="mylist" resultType="com.shoeping.question.vo.QuestionVO">
+	select qno, title, id, itemNo, content, writeDate, pw
+	from question
+	where id = #{id}			
+	order by qno desc
+</select>
+
+
+<select id="view" resultType="com.shoeping.question.vo.QuestionVO">
+	select qno, title, content, id, itemNo, writeDate
+	from question
+	where qno = #{qno}
+	<if test="id != null">
+		and id = #{id}
+	</if>
+</select>
+
+<insert id="write">
+	insert into question(qno, title, content, id, itemNo, pw)
+	values(question_seq.nextval, #{title}, #{content}, #{id}, #{itemNo}, #{pw})
+</insert>
+
+<update id="update">
+	update question set title = #{title}, content = #{content}, pw = #{pw}
+	where qno = #{qno} and id = #{id} and itemNo = #{itemNo}
+</update>
+
+<delete id="delete">
+	delete from question
+	where qno = #{qno} and itemNo = #{itemNo}
+	<if test="id != null">
+		and id = #{id} 
+	</if>
+</delete>
+
+</mapper>

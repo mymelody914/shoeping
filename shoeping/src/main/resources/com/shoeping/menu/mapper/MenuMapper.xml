@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shoeping.menu.mapper.MenuMapper">
+ <select id="list" resultType="com.shoeping.item.vo.ItemVO">
+    SELECT itemNo, category, brand, itemName, itemPrice, fileName, imageNo
+    FROM (
+        SELECT rowNum rnum, itemNo, category, brand, itemName, itemPrice,
+               (SELECT fileName
+                FROM images img
+                WHERE i.itemNO = img.itemNo AND pr = 1) fileName, 
+               (SELECT imageNo
+                FROM images img
+                WHERE i.itemNO = img.itemNo AND pr = 1) imageNo
+        FROM items i
+        <where>
+            <if test="category != null">
+                AND category = #{category}
+            </if>
+            <if test="brand != null">
+                AND brand = #{brand}
+            </if>
+        </where>
+        ORDER BY itemNo DESC
+    )   
+    WHERE rnum BETWEEN #{pageObject.startRow} AND #{pageObject.endRow}
+</select>
+
+ <select id="getTotalRow" resultType="Long">
+      select count(*)
+      from items
+        <where>
+            <if test="category != null">
+                AND category = #{category}
+            </if>
+            <if test="brand != null">
+                AND brand = #{brand}
+            </if>
+        </where>
+
+   </select>
+
+</mapper> 

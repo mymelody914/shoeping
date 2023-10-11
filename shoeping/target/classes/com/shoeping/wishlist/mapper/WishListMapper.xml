@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shoeping.wishlist.mapper.WishListMapper">
+<select id="list" resultType="com.shoeping.wishlist.vo.WishListVO">
+select w.wishListNo,i.itemNo,i.itemName,i.itemPrice,i.brand,w.imageNo,img.fileName,img.pr from wishList w, items i,images img 
+where w.id = #{id} and(w.itemNo = i.itemNo)and (img.imageNo = w.imageNo)
+</select>
+
+
+<delete id="deleteWishList">
+delete from wishList where wishListNo = #{wishListNo}
+</delete>
+
+<select id="checkWishList" resultType="Long">
+select wishListNo from wishList where id=#{id} and itemNo = #{itemNo}
+</select>
+<select id="countWishList" resultType="Integer">
+select count(*) from wishList where id=#{id} and itemNo = #{itemNo}
+</select>
+
+<insert id="insertWishList">
+insert into wishList(wishListNo,id,itemNo,imageNo)
+values(wishList_seq.nextval,#{id},#{itemNo},#{imageNo})
+</insert>
+
+<select id="findWishListNo" resultType="Long">
+
+select wishListNo from wishList where id=#{id} and itemNo = #{itemNo}
+</select>
+
+<select id="wishListNumber" resultType="Long">
+	select count(*) from wishList where itemNo = #{itemNo}
+</select>
+
+
+</mapper>

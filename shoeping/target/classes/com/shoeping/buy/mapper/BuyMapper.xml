@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.shoeping.buy.mapper.BuyMapper">
+ 	
+ 	<!-- ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 주문 리스트  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ -->
+
+	<select id="list" resultType="com.shoeping.buy.vo.OrderVO">
+	select orderNo, buyNo, ItemNo, itemName, buyColor, buySize, quantity, itemPrice, buyDate, fileName, status, buyPrice
+	from(
+		select rowNum rnum, orderNo, buyNo, ItemNo, itemName, buyColor, buySize, quantity, itemPrice, buyDate, fileName , status ,buyPrice
+			from (
+				select o.orderNo, o.buyNo, o.ItemNo, i.itemName, o.buyColor, o.buySize, o.quantity, i.itemPrice, b.buyDate, b.status, i.itemPrice * o.quantity as buyPrice,
+				(select fileName
+                   from images img
+                   where i.itemNO = img.itemNo and pr = 1) fileName
+				from buyOrder o, buy b, items i
+				where b.memberId = #{memberId} and (o.buyNo = b.buyNo) and (o.itemNo = i.itemNo)
+		        order by b.buydate desc
+			)
+	)
+	where rnum between #{pageObject.startRow} and #{pageObject.endRow}
+	</select>
+	
+	<select id="getTotalRow" resultType="Long">
+      select count(*)
+      from buy
+      where memberId = #{memberId}
+   	</select>
+
+ 	<!-- ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 카트 결제  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ -->
+ 	<insert id="buy">
+ 		<selectKey keyProperty="buyNo" resultType="Long" order="BEFORE">
+ 			select buy_seq.nextval
+ 			from dual
+ 		</selectKey>
+ 		insert into buy(buyNo, name, tel, address, memberId, totalPrice)
+ 		values(#{buyNo}, #{name}, #{tel}, #{address}, #{memberId}, #{totalPrice})
+ 	</insert>
+ 	
+ 	<!-- 오더 정보 저장 -->
+ 	<insert id="cartOrder">
+		insert into buyOrder(orderNo, buyNo, itemNo, buyColor, buySize, quantity)
+		(select buyorder_seq.nextval, #{buyNo}, itemNo, color, buySize, quantity
+		from cart
+		where id = #{memberId})
+ 	</insert>
+ 	
+ 	<!-- 카트 리스트 삭제 -->
+ 	<delete id="deleteCart">
+ 		delete from cart
+ 		where id = #{memberId}
+ 	</delete>
+ 
+ 	<!-- ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 바로 결제 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ -->
+ 	<insert id="buyDirect">
+ 		<selectKey keyProperty="buyNo" resultType="Long" order="BEFORE">
+ 			select buy_seq.nextval
+ 			from dual
+ 		</selectKey>
+ 		insert into buy(buyNo, name, tel, address, memberId, totalPrice)
+ 		values(#{buyNo}, #{name}, #{tel}, #{address}, #{memberId}, #{totalPrice})
+ 	</insert>
+ 	
+ 	<insert id="order">
+ 		insert into buyOrder(orderNo, buyNo, itemNo, buycolor, buySize, quantity)
+ 		values(buyOrder_seq.nextval, #{buyNo}, #{itemNo}, #{color}, #{size}, #{quantity})
+ 	</insert>
+ 	
+ 	<!-- ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 관리자 주문 관리 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ -->
+ 	<select id="buyList" resultType="com.shoeping.buy.vo.BuyVO">
+	select buyNo, memberId, buyDate, totalPrice, status	
+		from (
+			 select rouNum rnum, buyNo, memberId, buyDate, totalPrice, status	
+			 	from(
+			 		select buyNo, memberId, buyDate, totalPrice, status
+			    	from buy order by buyDate desc
+			 	)
+		)
+	where rnum between 1 and 10	 
+ 	</select>
+ 	
+ 	<update id="update">
+ 		update buy set status = #{status}
+   	 	where buyNo = #{buyNo}
+ 	</update>
+ 	
+ </mapper>

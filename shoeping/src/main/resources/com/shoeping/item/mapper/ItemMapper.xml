@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shoeping.item.mapper.ItemMapper">
+   <!-- list -->
+
+   <select id="list" resultType="com.shoeping.item.vo.ItemVO">
+   select itemNo, category, brand, itemName, itemPrice, fileName,imageNo
+      from(
+         select rowNum rnum, itemNo, category, brand, itemName, itemPrice, fileName,imageNo
+            from(
+               select itemNo, category, brand, itemName, itemPrice,
+                  (select fileName
+                   from images img
+                   where i.itemNO = img.itemNo and pr = 1) fileName, 
+                   (select imageNo
+                   from images img
+                   where i.itemNO = img.itemNo and pr = 1) imageNo
+               from items i 
+               <include refid="search"/>
+               order by itemNo desc
+            )   
+      )
+   where rnum between #{startRow} and #{endRow}
+   </select>
+   
+   <select id="getTotalRow" resultType="Long">
+      select count(*)
+      from items
+      <include refid="search"/>
+   </select>
+   
+   <sql id="search">
+   <if test="word != null and word != ''">
+         where 1 = 0
+         <if test="key.indexOf('t') >= 0">
+            or title like '%' || #{word} || '%'
+         </if>
+         <if test="key.indexOf('c') >= 0">
+            or content like '%' || #{word} || '%'
+         </if>
+         <if test="key.indexOf('w') >= 0">
+            or writer like '%' || #{word} || '%'
+         </if>
+      </if>
+   </sql>
+   
+   <select id="view" resultType="com.shoeping.item.vo.ItemVO">
+      select itemNo, category, brand, itemName, colors, sizes, itemPrice, detailImage
+      from items
+      where itemNo = #{itemNo}
+   </select>
+   
+   <select id="getImageFile" resultType="com.shoeping.item.vo.ImageVO">
+      select imageNo, fileName, pr
+      from images
+      where itemNo = #{itemNo}
+      order by pr desc
+   </select>
+   
+   <select id="categoryList" resultType="com.shoeping.item.vo.CategoryVO">
+   select category from categorys
+   </select>
+      
+   <select id="brandList" resultType="com.shoeping.item.vo.BrandVO">
+   select brand from brands
+   </select>
+   
+   <insert id="write">
+      <selectKey keyProperty="itemNo" resultType="Long" order="BEFORE">
+         select items_seq.nextval
+         from dual
+      </selectKey>
+      insert INTO items(itemNo, itemName, colors, sizes, itemPrice, detailImage, category, brand, memberId)
+      values(#{itemNo}, #{itemName}, #{colors}, #{sizes}, #{itemPrice}, #{detailImage}, #{category}, #{brand}, #{membrId})
+   </insert>
+   
+   <!-- 이미지 파일 정보 저장 imageVO.no -> imageFileVO.no -->
+   <insert id="writeFile">
+      insert into images(imageNo, itemNo, fileName, pr)
+      values (images_seq.nextval, #{itemNo}, #{fileName}, #{pr})
+   </insert>
+   
+   <update id="update">
+		update items
+		set itemName = #{itemName}, category = #{category}, brand = #{brand}, 
+				itemPrice = #{itemPrice}, colors= #{colors}, sizes = #{sizes}
+		where itemNo = #{itemNo}
+   </update>
+   
+   <update id="changeImage">
+		update images
+		set fileName = #{fileName}
+		where imageNo = #{imageNo}
+	</update>
+	
+	<delete id="deleteImage">
+		delete from images if
+		where imageNo = #{imageNo}
+			and pr != 1
+	</delete>
+
+   <update id="changeDetailImage">
+		update items
+		set detailImage = #{detailImage}
+		where itemNo = #{itemNo}
+	</update>
+	
+	<delete id="delete">
+	delete from items
+	where itemNo = #{itemNo}
+	</delete>
+	
+</mapper>

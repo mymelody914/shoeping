@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shoeping.resell.mapper.ResellMapper">
+<select id="list" resultType="com.shoeping.resell.vo.ResellVO">
+ select resellNo, category, brand, resellName, resellPrice, regDate,sizes,color,resellModelName,dday,
+                  (select fileName
+                   from resellImage img
+                   where r.resellNO = img.resellNo and pr = 1) fileName
+               from resell r 
+               order by regDate desc
+
+</select>
+<insert id="write" >
+	<selectKey keyProperty="resellNo"  resultType="Long" order="BEFORE">
+		select Resell_seq.nextval from dual
+	</selectKey>
+	
+	
+		insert into Resell(resellNo,resellName,resellPrice,color,sizes,id,brand,category,dday,resellModelName) 
+		values(#{resellNo}, #{resellName},#{resellPrice},#{color},#{sizes},#{id},#{brand},#{category},#{dday},#{resellModelName})
+	
+	</insert>
+	
+	
+	<!--  이미지 파일 정보 저장 imageVO.no  -> imageFileVO.no 에 저장  -->
+	<insert id="writeFile">
+		insert into resellImage(imageNo,resellNo, fileName,pr)
+		values(resell_image_seq.nextval, #{resellNo}, #{fileName}, #{pr})
+	</insert>
+	
+	
+	<select id="getCategory" resultType="com.shoeping.resell.vo.ResellVO">
+	select category from categorys 
+	</select>
+	<select id="getBrand" resultType="com.shoeping.resell.vo.ResellVO">
+	select brand from brands 
+	</select>
+
+
+<select id="view" resultType="com.shoeping.resell.vo.ResellVO">
+ select resellNo, category, brand, resellName, resellPrice, regDate,sizes,color,resellModelName,dday,
+ (select imageNo from resellImage img 
+ where r.resellNo = img.resellNo) imageNo,
+                  (select fileName
+                   from resellImage img
+                   where r.resellNO = img.resellNo and pr = 1) fileName 
+               from resell r where resellNo = #{resellNo}
+               order by regDate desc
+
+</select>
+
+
+<update id="update" >
+
+	update resell set resellName=#{vo.resellName} , category=#{vo.category},brand=#{vo.brand},resellModelName = #{vo.resellModelName},
+	resellPrice = #{vo.resellPrice},sizes = #{vo.sizes},color=#{vo.color},dday=#{vo.dday}  where resellNo = #{vo.resellNo}
+	
+
+</update>
+	
+	
+	<!--  이미지 파일 정보 저장 imageVO.no  -> imageFileVO.no 에 저장  -->
+	<update id="changeImage">
+		update resellImage set fileName= #{fileName} where imageNo = #{imageNo}
+	</update>
+	
+	
+	<delete id="delete">
+	
+	delete from resell where resellNo = #{resellNo}
+	</delete>
+
+
+
+</mapper>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shoeping.review.mapper.ReviewMapper">
+	<select id="list" resultType="com.shoeping.review.vo.ReviewVO">
+
+		select
+		r.itemNo,i.itemName,r.review_no,r.title,
+		r.content,r.writeDate,r.fileName,r.id ,r.orderNo,
+		( select count(*)
+		from review_like l
+		where r.review_no = l.review_no) count
+		from review r,
+		items i, member m,
+		buyorder o
+		where (i.itemNo=r.itemNo) and (m.id=r.id)
+		and(o.orderNo=r.orderNo)
+		order by r.review_no desc
+
+
+
+
+
+	</select>
+
+	<select id="reviewlist"
+		resultType="com.shoeping.review.vo.ReviewVO">
+		select r.itemNo,i.itemName,r.review_no,r.title,
+		r.content,r.writeDate,r.fileName,r.id ,o.orderNo
+		from review r, items
+		i, member m, buyorder o
+		where (i.itemNo=r.itemNo) and (m.id=r.id)
+		and(o.orderNo=r.orderNo)
+		and r.itemNo=#{itemNo}
+	</select>
+
+
+
+
+	<select id="getTotalRow" resultType="Long">
+		select count(*)
+		from review
+	</select>
+
+	<update id="changeLike">
+		update review_like set like= #{status}
+		where id=#{id}
+
+
+	</update>
+
+	<insert id="write">
+
+
+		insert into review(review_no, itemNo, orderNo,
+		title,content,fileName, id)
+		values(review_seq.nextval,
+		#{itemNo},#{orderNo},#{title}, #{content},#{fileName},
+		#{id})
+	
+
+	</insert>
+
+	<update id="update">
+
+	update review
+		set title=#{title},content=#{content}
+		where
+		review_no = #{review_no} and id =
+		#{id}
+
+	</update>
+
+
+	<select id="view" resultType="com.shoeping.review.vo.ReviewVO">
+		select
+		i.itemNo,i.itemName,r.review_no,r.writeDate,r.title,
+		r.content,r.fileName,r.id
+		from review r, items i
+		where review_no =
+		#{review_no} and (r.itemNo = i.itemNo)
+	</select>
+
+	<delete id="delete">
+
+		delete from review
+		<if test="gradeNo == 1">
+			where review_no=#{review_no} and id=#{id}
+		</if>
+		<if test="gradeNo == 9">
+			where review_no=#{review_no}
+		</if>
+
+	</delete>
+	<update id="change">
+
+		update review
+		set fileName = #{fileName}
+		where
+		review_no = #{review_no} and id
+		= #{id}
+
+	</update>
+	<select id="checkLike" resultType="Integer">
+		select review_like_no from
+		review_like where id=#{id} and
+		review_no=#{review_no}
+	</select>
+
+	<insert id="likeInsert">
+		insert into review_like (review_like_no,id,review_no)
+		VALUES(REVIEW_LIKE_SEQ.nextval,#{id},#{review_no})
+	</insert>
+
+	<delete id="likeDelete">
+		delete from review_like
+		where review_like_no =
+		#{review_like_no}
+
+	</delete>
+	<select id="orderCk"
+		resultType="com.shoeping.review.vo.ReviewVO">
+		select o.orderNo,i.itemNo,i.itemName from buy r, buyorder
+		o, items i where
+		r.buyno = o.buyno
+		and o.itemno = i.itemno and
+		r.memberid= #{id} and o.orderNo not
+		in(select orderNo from review
+		where id
+		= (select id from member m where m.id=#{id}))
+	</select>
+
+	<select id="checkReview" resultType="Integer">
+		select count(*) from review
+		where id=#{id} and orderNo=#{orderNo}
+
+	</select>
+
+</mapper>

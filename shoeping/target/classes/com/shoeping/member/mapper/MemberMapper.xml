@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shoeping.member.mapper.MemberMapper">
+	<select id="login" resultType="com.shoeping.member.vo.LoginVO">
+		select m.id, m.name, m.gradeNo,
+		g.gradeName, m.nickName, m.statusNo, s.statusName
+		from member m, grade
+		g, status s
+		where (id = #{id} and pw
+		= #{pw}) and (m.gradeNo =
+		g.gradeNo) and (m.statusNo = s.statusNo)
+	</select>
+
+	<select id="view" resultType="com.shoeping.member.vo.MemberVO">
+		select m.id, m.name, m.nickName,
+		g.gradeName, m.gradeNo, m.email, m.phone,
+		m.zipcode, m.address,
+		m.mySize, s.statusNo,
+		m.regDate, m.birth, m.profilePhoto from member m,
+		grade g, status s
+		where id = #{id} and (m.gradeNo = g.gradeNo) and
+		(s.statusNo = m.statusNo)
+	</select>
+	
+	<select id="checkId" resultType="Integer">
+		select count(*)
+		from member
+		where
+		id = #{id}
+	</select>
+
+	<!-- 닉네임 중복 체크 -->
+	<select id="checkNickname" resultType="Integer">
+		select count(*)
+		from member
+		where nickname = #{nickname}
+	</select>
+
+	<select id="list" resultType="com.shoeping.member.vo.MemberVO">
+		select id, name, phone, gradeNo, gradeName, email, nickName, statusNo
+		from (
+		select rownum rnum, id, name, phone, gradeNo, gradeName, email,
+		nickName, statusNo
+		from (
+		select m.id, m.name, m.phone, m.gradeNo,
+		g.gradeName,
+		m.email, m.nickName, s.statusNo
+		from grade g, member m,
+		status s
+		where (g.gradeNo = m.gradeNo) and (s.statusNo = m.statusNo)
+		<if test="word != null and word != ''">
+			and (
+			<if test="key.indexOf('id') >= 0">
+				id like '%' || #{word} || '%'
+			</if>
+			<if test="key.indexOf('name') >= 0">
+				name like '%' || #{word} || '%'
+			</if>
+			<if test="key.indexOf('email') >= 0">
+				email like '%' || #{word} || '%'
+			</if>
+			)
+		</if>
+		order by id asc
+		)
+		)
+		where rnum between #{startRow} and #{endRow}
+	</select>
+
+	<select id="getTotalRow" resultType="Long">
+		select count(*)
+		from member
+		<where>
+			<if test="word != null and word != ''">
+				and (
+				<if test="key.indexOf('id') >= 0">
+					id like '%' || #{word} || '%'
+				</if>
+				<if test="key.indexOf('name') >= 0">
+					name like '%' || #{word} || '%'
+				</if>
+				<if test="key.indexOf('email') >= 0">
+					email like '%' || #{word} || '%'
+				</if>
+				)
+			</if>
+		</where>
+	</select>
+
+	<insert id="register">
+		insert into member (id, pw, name, birth, email,
+		phone, zipCode, address,
+		nickName)
+		values(#{id}, #{pw}, #{name},
+		#{birth}, #{email}, #{phone},
+		#{zipCode}, #{address}, #{nickName})
+	</insert>
+
+	<update id="changeGrade">
+		update member set gradeNo = #{gradeNo} where id =
+		#{id}
+	</update>
+
+	<update id="changeStatus">
+		update member set statusNo = #{statusNo} where id =
+		#{id}
+	</update>
+
+	<update id="changePhoto">
+		update member set profilePhoto = #{profilePhoto}
+		where id = #{id}
+	</update>
+
+	<update id="updateInfo">
+		update member set nickName = #{nickName}, email =
+		#{email}, address =
+		#{address} where id = #{id}
+	</update>
+
+	<select id="findID" resultType="String">
+		select id from member
+		where email
+		= #{email}
+	</select>
+
+	<select id="findIDCheck" resultType="Integer">
+		select count(*)
+		from member
+		where email = #{email}
+	</select>
+
+	<update id="changePw">
+		update member set pw = #{pw}
+		where id = #{id}
+	</update>
+
+	<insert id="categoryAdd">
+		insert into categorys(category)
+		values(#{category})
+	</insert>
+
+	<delete id="categoryDelete">
+		delete from categorys
+		where category = #{category}
+	</delete>
+
+	<insert id="brandAdd">
+		insert into brands(brand)
+		values(#{brand})
+	</insert>
+
+	<delete id="brandDelete">
+		delete from brands
+		where brand = #{brand}
+	</delete>
+</mapper>

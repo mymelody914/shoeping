@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.shoeping.notice.mapper.NoticeMapper">
+ <select id="list" resultType="com.shoeping.notice.vo.NoticeVO">
+ 
+ select notice_no,title,content,writeDate from
+ (select rownum rnum, notice_no,title,content, writeDate from(
+ select notice_no,title,content,writeDate from notice
+ order by notice_no desc) )where rnum between #{startRow} and #{endRow}
+ 
+ </select>
+ 
+ <select id="getTotalRow" resultType="Long">
+		select count(*)
+		from notice
+ </select>
+ 
+ <select id="view" resultType="com.shoeping.notice.vo.NoticeVO">
+ 
+ SELECT notice_no, title, content
+FROM notice
+WHERE notice_no = #{no}
+ </select>
+ 
+ <update id="update">
+ UPDATE notice
+SET title = #{title}, content = #{content}
+WHERE notice_no = #{notice_no}
+ 
+ 
+ </update>
+ 
+ <insert id="write">
+ INSERT INTO notice(notice_no, title, content)
+VALUES(notice_seq.nextval, #{title}, #{content})
+ 
+ 
+ </insert>
+ 
+ <delete id="delete">
+ 
+ DELETE FROM notice
+WHERE notice_no = #{notice_no}
+ 
+ </delete>
+ </mapper>

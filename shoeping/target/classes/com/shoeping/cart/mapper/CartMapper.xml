@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shoeping.cart.mapper.CartMapper">
+
+<select id="list" resultType="com.shoeping.cart.vo.CartVO">
+select c.cartNo,c.id,c.itemNo ,c.color , c.buysize ,i.itemName,i.itemPrice , 
+c.quantity, c.imageNo, img.pr,img.filename ,i.brand from cart c,items i,images img 
+where (img.pr = 1) and (i.itemNo =c.itemNo) and (c.imageNo = img.imageNo) and c.id=#{id}
+</select>
+
+<delete id="delete">
+delete from cart where cartNo = #{cartNo}
+</delete>
+
+<update id="quantityPlus">
+update cart set quantity = quantity+1 where cartNo =#{carNo}
+</update>
+<update id="quantityMinus">
+update cart set quantity =quantity-1 where cartNo =#{carNo}
+</update>
+
+<insert id="insertCart">
+insert into cart(cartNo,id,itemNo,imageNo,color,buysize,quantity)
+values(cart_seq.nextval,#{id},#{itemNo},#{imageNo},#{color},#{size},#{quantity} )
+
+</insert>
+</mapper>
