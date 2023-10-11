@@ -32,8 +32,8 @@
 
 Spring
 
-- Controller : https://github.com/mymelody914/shoeping/tree/main/shoeping/src/main/java/com/shoeping/member/controller
- https://github.com/mymelody914/shoeping/tree/main/shoeping/src/main/java/com/shoeping/member/ajax/controller
+- Controller : https://github.com/mymelody914/shoeping/blob/main/shoeping/src/main/java/com/shoeping/member/controller/MemberController.java
+ https://github.com/mymelody914/shoeping/blob/main/shoeping/src/main/java/com/shoeping/member/ajax/controller/MemberAjaxController.java
 
 - Service : https://github.com/mymelody914/shoeping/blob/main/shoeping/src/main/java/com/shoeping/member/service/MemberServiceImpl.java
 
